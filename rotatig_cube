@@ -1,0 +1,84 @@
+import pygame
+from pygame.locals import *
+import sys
+import math
+
+# Initialize Pygame
+pygame.init()
+
+# Set up display
+width, height = 800, 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Rotating Cube")
+
+# Define cube vertices
+vertices = [
+    (-1, -1, -1),
+    (1, -1, -1),
+    (1, 1, -1),
+    (-1, 1, -1),
+    (-1, -1, 1),
+    (1, -1, 1),
+    (1, 1, 1),
+    (-1, 1, 1)
+]
+
+# Define cube edges
+edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),
+    (4, 5), (5, 6), (6, 7), (7, 4),
+    (0, 4), (1, 5), (2, 6), (3, 7)
+]
+
+# Define colors
+black = (0, 0, 0)
+white = (255, 255, 255)
+blue = (0, 0, 255)
+
+# Initialize rotation angles
+angle_x = 0
+angle_y = 0
+
+# Main loop
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+    screen.fill(white)
+
+    # Rotate vertices around X and Y axes
+    rotated_vertices = []
+    for vertex in vertices:
+        x, y, z = vertex
+
+        # Rotate around X axis
+        new_y = y * math.cos(angle_x) - z * math.sin(angle_x)
+        new_z = y * math.sin(angle_x) + z * math.cos(angle_x)
+
+        # Rotate around Y axis
+        new_x = x * math.cos(angle_y) + new_z * math.sin(angle_y)
+        new_z = -x * math.sin(angle_y) + new_z * math.cos(angle_y)
+
+        rotated_vertices.append((new_x, new_y, new_z))
+
+    # Project 3D points onto 2D screen
+    projected_points = []
+    for vertex in rotated_vertices:
+        x, y, z = vertex
+        f = 800  # Focal length for perspective projection
+        scale = f / (z + 5)  # Adjust the scale factor for better visibility
+        projected_x = int(x * scale + width / 2)
+        projected_y = int(y * scale + height / 2)
+        projected_points.append((projected_x, projected_y))
+
+    # Draw edges
+    for edge in edges:
+        pygame.draw.line(screen, blue, projected_points[edge[0]], projected_points[edge[1]], 1)
+
+    pygame.display.update()
+
+    # Rotate angles for the next frame
+    angle_x += 0.01
+    angle_y += 0.01
